@@ -1,0 +1,78 @@
+from kivy.app import App # само окно
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.config import Config
+
+from datetime import datetime
+import time
+import subprocess # модуль для запусков процессов вместо os
+import winsound # воспроизведение звуков винды
+
+# Размер окна
+Config.set('graphics', 'resizable', '0') # Нельзя менять размер окна
+Config.set('graphics', 'width', '640') # Щирина
+Config.set('graphics', 'height', '480') # Высота
+
+class ZapingatorApp(App):
+    def build(self):
+        bl = BoxLayout(orientation='horizontal',
+                       padding=[5],
+                       spacing=5)
+        # fl = FloatLayout(size = (300, 300))
+        my_button = Button(on_press=self.run_zapingator,
+                             text='жым-жым',
+                             font_size=14,
+                             background_color=[1, 0, 0, 1],
+                             background_normal='',
+                             size_hint = (.25, .25),
+                             pos = (640 / 2 - 160, 0))
+        # fl.add_widget(my_button)
+        bl.add_widget(my_button)
+
+        self.lbl = Label(text='sds', halign='left', valign='top', text_size=(480 - 10, 640 * .75 - 10))
+        bl.add_widget(self.lbl)
+        return bl
+
+    
+
+    def run_zapingator(self, aaa):
+        start_time = datetime.now() # измерение времени работы
+        aaa.text = 'Запинговываю'
+
+        f = open("hosts.txt", 'r', encoding='utf-8')
+        try:
+            ip_list = []
+            for line in f:
+                ip_list.append(line.rstrip('\n'))
+            print(ip_list)
+        finally:
+            f.close()
+
+        num_errors = 0
+        list_errors = []
+        for ip in ip_list:
+            process = subprocess.call(['ping', '-n', '2', ip])
+            if process > 0:
+                winsound.PlaySound('sound.wav', winsound.SND_FILENAME) # воспроизведение звуков винды
+                num_errors += 1
+                list_errors.append(ip)
+            print(process)
+            print('------------------')
+
+        print('########################################')
+        print("Колличество ошибок: ", num_errors)
+        print("Ошибки в: ", list_errors)
+        print('########################################')
+        time_all = datetime.now() - start_time
+        print('Время выполнения программы: ', datetime.now() - start_time) # Вывод времени работы
+        print('########################################')
+        texxt = 'Запинговал за ' + str(time_all)
+        # my_button = Button(text = 'Запинговал за ' + str(time_all))
+        print(texxt)
+        texxt = 'Запинговал за ' + str(time_all)
+
+
+if __name__ == '__main__': # проверка на запуск "напрямую" из консоли, а не из другой программы
+    ZapingatorApp().run()
